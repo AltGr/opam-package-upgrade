@@ -15,7 +15,7 @@ open Cmdliner
 let upgrade_package_command =
   let files_arg =
     Arg.(value & pos_all OpamArg.existing_filename_dirname_or_dash [None] &
-         info [] ~doc:
+         info [] ~docv:"FILE" ~doc:
            "Package definition (\"opam\") files to update, or package \
             directory containing them, or \"-\" to read from stdin.")
   in
