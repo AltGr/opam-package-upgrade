@@ -13,8 +13,8 @@ open OpamTypes
 open Cmdliner
 
 let upgrade_package_command =
-  let files =
-    Arg.(value & pos_all OpamArg.existing_filename_dirname_or_dash [] &
+  let files_arg =
+    Arg.(value & pos_all OpamArg.existing_filename_dirname_or_dash [None] &
          info [] ~doc:
            "Package definition (\"opam\") files to update, or package \
             directory containing them, or \"-\" to read from stdin.")
@@ -26,27 +26,41 @@ let upgrade_package_command =
       let o1 = OpamFile.OPAM.read f in
       let o2 = OpamFormatUpgrade.opam_file o1 in
       if o2 <> o1 then
-        (OpamFile.OPAM.write f;
-         OpamConsole.formatted_msg "File %s upgraded to format %s"
+        (OpamFile.OPAM.write f o2;
+         OpamConsole.note "File %s upgraded to format %s"
            (OpamFile.to_string f)
            (OpamVersion.to_string OpamFormatUpgrade.latest_version))
       else
-        OpamConsole.formatted_msg "File %s is already at latest version"
+        OpamConsole.note "File %s is already at latest version"
           (OpamFile.to_string f)
     in
     match f with
-      | None ->
-        OpamFile.OPAM.read_from_channel stdin |>
-        OpamFormatUpgrade.opam_file |>
-        OpamFile.OPAM.write_to_channel stdout
-      | Some (F f) -> upgrade_file f
-      | Some (D d) ->
-        match OpamPinned.files_in_source d with
-        | [] -> OpamConsole.error "No opam files found in %s"
-                  (OpamFilename.Dir.to_string d)
-        | fs -> List.map (fun (_, f) -> upgrade_file f) fs
+    | None ->
+      OpamFile.OPAM.read_from_channel stdin |>
+      OpamFormatUpgrade.opam_file |>
+      OpamFile.OPAM.write_to_channel stdout
+    | Some (OpamFilename.F f) -> upgrade_file (OpamFile.make f)
+    | Some (OpamFilename.D d) ->
+      match OpamPinned.files_in_source d with
+      | [] -> OpamConsole.error "No opam files found in %s"
+                (OpamFilename.Dir.to_string d)
+      | fs -> List.iter (fun (_, f) -> upgrade_file f) fs
   in
-  Term.(pure cmd $ files)
+  Term.(pure cmd $ files_arg),
+  Term.info "opam-package-upgrade"
+    ~doc:"Upgrades opam package definition files to the latest format version"
+    ~man:[
+      `S "DESCRIPTION";
+      `P (Printf.sprintf
+            "This simple command-line tool updates the format of opam files from \
+             earlier versions to %s (current as of opam %s)"
+            (OpamVersion.to_string (OpamFormatUpgrade.latest_version))
+            (OpamVersion.to_string (OpamVersion.current)));
+      `P "Files listed on the command-line are updated in place. You can also \
+          specify a directory, in which case all opam files found there will \
+          be updated. With $(b,-), or no argument, reads from stdin, and \
+          prints back to stdout."
+    ]
 
 let () =
   OpamSystem.init ();
