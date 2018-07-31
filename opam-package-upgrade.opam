@@ -8,7 +8,7 @@ homepage: "https://github.com/AltGr/opam-package-upgrade"
 bug-reports: "https://github.com/AltGr/opam-package-upgrade/issues"
 tags: ["org:ocamlpro" "flags:plugin"]
 depends: [
-  "opam-client" {= "2.0.0~beta3.1"}
+  "opam-client" {>= "2.0.0~beta3.1"}
   "cmdliner"
   "jbuilder"
 ]
