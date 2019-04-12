@@ -24,15 +24,26 @@ let upgrade_package_command =
     files |> List.map @@ fun f ->
     let upgrade_file f =
       let o1 = OpamFile.OPAM.read f in
+      let o1 =
+        OpamFileTools.add_aux_files ~dir:(OpamFilename.dirname (OpamFile.filename f))
+          ~files_subdir_hashes:true o1
+      in
       let o2 = OpamFormatUpgrade.opam_file o1 in
-      if o2 <> o1 then
+      (if o2 <> o1 then
         (OpamFile.OPAM.write f o2;
          OpamConsole.note "File %s upgraded to format %s"
            (OpamFile.to_string f)
            (OpamVersion.to_string OpamFormatUpgrade.latest_version))
       else
         OpamConsole.note "File %s is already at latest version"
-          (OpamFile.to_string f)
+          (OpamFile.to_string f));
+      List.iter
+        OpamFilename.(fun name ->
+          let file = Op.(dirname (OpamFile.filename f) // name) in
+          if exists file &&
+               OpamConsole.confirm ~default:true "Remove old %s file?" name then
+            remove file)
+        ["descr";"url"]
     in
     match f with
     | None ->
