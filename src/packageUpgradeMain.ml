@@ -9,7 +9,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open OpamTypes
 open Cmdliner
 
 let upgrade_package_command =
