@@ -1,13 +1,17 @@
 opam-version: "2.0"
 name: "opam-package-upgrade"
-version: "0.1"
+version: "0.2"
 maintainer: "Louis Gesbert <louis.gesbert@ocamlpro.com>"
 authors: "Louis Gesbert <louis.gesbert@ocamlpro.com>"
-license: "GPL-3"
-synopsis: "Tool to upgrade package definition files from 1.2 to 2.0 format"
+license: "GPL-3.0-only"
+synopsis: "Upgrades opam package definition files to the latest format"
+description: """
+A simple command-line tool based on the opam library to easily upgrade
+individual package definition files."""
 homepage: "https://github.com/AltGr/opam-package-upgrade"
 bug-reports: "https://github.com/AltGr/opam-package-upgrade/issues"
-tags: ["org:ocamlpro" "flags:plugin"]
+tags: "org:ocamlpro"
+flags: plugin
 depends: [
   "opam-client" {>= "2.0.1"}
   "cmdliner"
