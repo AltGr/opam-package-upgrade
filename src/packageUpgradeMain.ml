@@ -54,7 +54,7 @@ let upgrade_package_command =
       match OpamPinned.files_in_source d with
       | [] -> OpamConsole.error "No opam files found in %s"
                 (OpamFilename.Dir.to_string d)
-      | fs -> List.iter (fun (_, f) -> upgrade_file f) fs
+      | fs -> List.iter (fun (_, f, _) -> upgrade_file f) fs
   in
   Term.(pure cmd $ files_arg),
   Term.info "opam-package-upgrade"
